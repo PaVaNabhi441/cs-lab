@@ -7,15 +7,6 @@ Msg_sgl  = cos(2*pi*fm*t);
 Carr_sgl = 0.5*square(2*pi*fc*t) + 0.5;
 Mod_sgl  = Msg_sgl .* Carr_sgl;
 
-tt = [];
-for i = 1:length(Mod_sgl)
-    if Mod_sgl(i) == 0
-        tt = [tt, Mod_sgl(i)];
-    else
-        tt = [tt, Mod_sgl(i) + 2];
-    end
-end
-
 figure;
 subplot(4,1,1);
 plot(t, Msg_sgl);
