@@ -58,3 +58,12 @@ ylabel('Amplitude');
 grid on;
 
 end
+
+%for fm mod_demod give input like :
+%Ac  = 1;      % Carrier Amplitude
+%fm  = 50;     % Message Signal Frequency (Hz)
+%fc  = 5000;   % Carrier Frequency (Hz) → Much higher than fm
+%F   = 10e4;   % Sampling Frequency (Hz) → At least 10 times fc
+%kf  = 1000;   % Frequency Sensitivity (Hz per unit amplitude)
+%Am  = 1;      % Message Signal Amplitude
+%means give kf very large
