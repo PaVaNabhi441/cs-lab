@@ -1,42 +1,46 @@
-function sample_and_reconstruct
-% User inputs
-fs = input('Enter the sampling frequency (Hz): ');
-f = input('Enter the frequency of the continuous signal (Hz): ');
-A = input('Enter the amplitude of the continuous signal: ');
+%% PAM using Natural Sampling
+fc = 1000;
+fm  = 10;
+fs = 100*fc;
+t = 0:1/fs:4/fm;
+Msg_sgl  = cos(2*pi*fm*t);
+Carr_sgl = 0.5*square(2*pi*fc*t) + 0.5;
+Mod_sgl  = Msg_sgl .* Carr_sgl;
 
-Ts = 1/fs;                         % Sampling period
-t = linspace(0, 1, fs*100);          % High-resolution time vector
-signal = A * sin(2*pi*f*t);          % Continuous signal
-
-% Generate pulse train (pulse width = 10% of Ts)
-tau = Ts/10;
-pulse = double(mod(t, Ts) < tau);
-sampled_signal = signal .* pulse;  % Sampled signal using pulse train
-
-% Ideal sampling instants and values
-t_samples = 0:Ts:1;
-sampled_values = A * sin(2*pi*f*t_samples);
-
-% Reconstruction using sinc interpolation
-reconstructed_signal = zeros(size(t));
-for k = 1:length(t_samples)
-    reconstructed_signal = reconstructed_signal + sampled_values(k) * sinc((t - t_samples(k)) / Ts);
+tt = [];
+for i = 1:length(Mod_sgl)
+    if Mod_sgl(i) == 0
+        tt = [tt, Mod_sgl(i)];
+    else
+        tt = [tt, Mod_sgl(i) + 2];
+    end
 end
 
 figure;
-subplot(3,1,1);
-plot(t, signal, 'b'); grid on;
-title('Original Continuous Signal');
-xlabel('Time (s)'); ylabel('Amplitude');
+subplot(4,1,1);
+plot(t, Msg_sgl);
+title('Message Signal');
+xlabel('Time');
+ylabel('Amplitude');
 
-subplot(3,1,2);
-stem(t_samples, sampled_values, 'r', 'filled'); grid on;
-title('Sampled Signal');
-xlabel('Time (s)'); ylabel('Amplitude');
+subplot(4,1,2);
+plot(t, Carr_sgl);
+title('Carrier Signal');
+xlabel('Time');
+ylabel('Amplitude');
 
-subplot(3,1,3);
-plot(t, reconstructed_signal, 'm', t, signal, 'k--'); grid on;
-title('Reconstructed Signal');
-xlabel('Time (s)'); ylabel('Amplitude');
-legend('Reconstructed','Original');
-end
+subplot(4,1,3);
+plot(t, Mod_sgl);
+title('PAM Modulated Signal');
+xlabel('Time');
+ylabel('Amplitude')
+
+
+[b, a] = butter(5, (fm*2)/(fc*10)); % 5th order Butterworth filter
+recovered_signal = filtfilt(b, a, Mod_sgl);
+
+subplot(4,1,4);
+plot(t, recovered_signal);
+title('PAM Modulated Signal');
+xlabel('Time');
+ylabel('Amplitude')
