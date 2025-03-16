@@ -43,26 +43,29 @@ for k = 1:length(data)
     
     %% NRZ-M (Non-Return to Zero - Mark)
     if bit == 1
-        level_nrzm = -level_nrzm;
+        level_nrzm = 1-level_nrzm;
     end
     NRZM = [NRZM, level_nrzm * ones(1, S)];
     
     %% Manchester (IEEE Standard)
     if bit == 1
-        manch_bit = [ones(1, S/2) -ones(1, S/2)];
+        manch_bit = [ones(1, S/2) zeros(1, S/2)];
     else
-        manch_bit = [-ones(1, S/2) ones(1, S/2)];
+        manch_bit = [zeros(1, S/2) ones(1, S/2)];
     end
     Manchester = [Manchester, manch_bit];
     
    %% Biphase Mark (Differential Manchester) - Corrected
-    if bit == 1
+    if bit==1
+        last_biphase=-last_biphase;
+    end
+    if last_biphase==1
         % Extra transition at the start + mandatory transition in the middle
-        biphase_bit = [-last_biphase * ones(1, S/2), last_biphase * ones(1, S/2)];
-        last_biphase = -last_biphase;  % Toggle for next bit
-    else
+        biphase_bit = [ones(1, S/2), zeros(1, S/2)];
+    end
+    if last_biphase==-1
         % Only mandatory transition in the middle
-        biphase_bit = [last_biphase * ones(1, S/2), -last_biphase * ones(1, S/2)];
+        biphase_bit = [zeros(1, S/2),ones(1, S/2)];
     end
     Biphase_Mark = [Biphase_Mark, biphase_bit];
 
@@ -147,6 +150,6 @@ grid on;
 subplot(4,1,4);
 plot(total_time, data_wave, 'b--', 'LineWidth', 1.5); hold on;
 plot(total_time, AMI, 'r', 'LineWidth', 1.5);
-title('AMI vs Data (Corrected for Positive Clock)');
+title('AMI vs Data');
 legend('Data', 'AMI');
 grid on;
